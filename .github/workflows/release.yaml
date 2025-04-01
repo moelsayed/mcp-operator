@@ -87,24 +87,65 @@ jobs:
           git push origin "api/${{ env.version }}"
 
 
-      - name: Conventional Changelog Action
-        id: changelog
-        uses: TriPSs/conventional-changelog-action@v5
+      - name: Build Changelog
+        id: github_release
+        uses: mikepenz/release-changelog-builder-action@v5
         with:
-          github-token: ${{ secrets.github_token }}
-          output-file: "false"
+          mode: "HYBRID"
+          configurationJson: |
+            {
+              "template": "#{{CHANGELOG}}",
+              "categories": [
+                {
+                    "title": "## Feature",
+                    "labels": ["feat", "feature"]
+                },
+                {
+                    "title": "## Fix",
+                    "labels": ["fix", "bug"]
+                },
+                {
+                    "title": "## Chore",
+                    "labels": ["chore"]
+                },
+                {
+                    "title": "## Other",
+                    "labels": []
+                    "rules": [
+                      {
+                        "pattern": "^(?!Merge pull request).*",
+                        "on_property": "title",
+                        "flags": "gu"
+                      }
+                    ]
 
+                }
+              ],
+              "label_extractor": [
+                {
+                  "pattern": "^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test){1}(\\([\\w\\-\\.]+\\))?(!)?: ([\\w ])+([\\s\\S]*)",
+                  "on_property": "title",
+                  "target": "$1"
+                }
+              ]
+            }
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      
       - name: Create GitHub release
-        if: ${{ env.SKIP != 'true' }}
+        # if: ${{ env.SKIP != 'true' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.version }}
-          name: ${{ steps.changelog.outputs.tag }}
-          body: ${{ steps.changelog.outputs.clean_changelog }}
+          name: Release ${{ env.version }}
+          body: ${{steps.github_release.outputs.changelog}}
           draft: true
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
       - name: Push dev VERSION
         if: ${{ env.SKIP != 'true' }}

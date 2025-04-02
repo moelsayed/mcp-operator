@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    
       
 permissions:
   contents: write # we need this to be able to push tags
@@ -114,6 +116,7 @@ jobs:
                     "labels": []
                 }
               ],
+
               "label_extractor": [
                 {
                   "pattern": "^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test){1}(\\([\\w\\-\\.]+\\))?(!)?: ([\\w ])+([\\s\\S]*)",

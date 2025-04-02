@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    
       
 permissions:
   contents: write # we need this to be able to push tags
@@ -95,6 +97,7 @@ jobs:
           configurationJson: |
             {
               "template": "#{{CHANGELOG}}",
+              "pr_template": "- #{{TITLE}}: ##{{NUMBER}}",
               "categories": [
                 {
                     "title": "## Feature",
@@ -103,10 +106,6 @@ jobs:
                 {
                     "title": "## Fix",
                     "labels": ["fix", "bug"]
-                },
-                {
-                    "title": "## Chore",
-                    "labels": ["chore"]
                 },
                 {
                     "title": "## Other",
